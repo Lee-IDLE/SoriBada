@@ -1,37 +1,56 @@
 package com.lee_idle.soribada
 
+import android.icu.lang.UCharacter.VerticalOrientation
 import android.os.Build
 import android.os.Bundle
 import android.view.View
 import android.view.WindowInsets
+import android.widget.ImageButton
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.Orientation
 import androidx.compose.foundation.gestures.draggable
 import androidx.compose.foundation.gestures.rememberDraggableState
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.Button
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.vectorResource
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.LiveData
+import androidx.navigation.NavDestination
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
@@ -52,6 +71,16 @@ class MainActivity : ComponentActivity() {
         // https://developer.android.com/training/system-ui?hl=ko 시스템 UI 제어하기
         enableEdgeToEdge() // 전체 앱의 콘텐츠에 인셋을 적용(시스템 UI와 겹침)
 
+        setContent {
+            val mainViewModel = MainViewModel()
+            BaseView(darkThemeState = SoriBadaApplication.darkTheme.value!!,
+                viewModel = mainViewModel)
+        }
+    }
+
+    override fun onResume() {
+        super.onResume()
+
         if(Build.VERSION.SDK_INT >= 30){
             val windowsInsetsController = window.insetsController
             windowsInsetsController?.show(WindowInsets.Type.systemBars())
@@ -59,16 +88,22 @@ class MainActivity : ComponentActivity() {
             // Full Screen 관련 https://soda1127.github.io/deep-dive-in-android-full-screen-1/ 참고
             window.decorView.systemUiVisibility = (
                     View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY or
-                    View.SYSTEM_UI_FLAG_FULLSCREEN or
-                    View.SYSTEM_UI_FLAG_HIDE_NAVIGATION)
+                            View.SYSTEM_UI_FLAG_FULLSCREEN or
+                            View.SYSTEM_UI_FLAG_HIDE_NAVIGATION)
         }
-        // 30 이상 버전
+    }
 
-        setContent {
-            val mainViewModel = MainViewModel()
-            BaseView(darkThemeState = SoriBadaApplication.darkTheme.value!!,
-                viewModel = mainViewModel)
+    override fun onPause() {
+        super.onPause()
+
+        // 애니메이션
+        /*
+        if(Build.VERSION.SDK_INT >= 34){
+            overrideActivityTransition(R.anim.slide_in_bottom, R.anim.slide_out_bottom, 0)
+        } else {
+            overridePendingTransition(R.anim.none, R.anim.slide_out_bottom)
         }
+         */
     }
 }
 
@@ -83,7 +118,7 @@ fun BaseView(
             modifier = Modifier
                 .fillMaxSize()
                 .imePadding(),
-            topBar = {  },
+            topBar = { TopAppBar(viewModel, navController) },
             content = { innerPadding ->
                 Column(modifier = Modifier.padding(innerPadding)) {
                     MainScreen(viewModel, navController)
@@ -94,9 +129,56 @@ fun BaseView(
 }
 
 @Composable
-fun TopAppBar(viewModel: MainViewModel) {
+fun TopAppBar(viewModel: MainViewModel, navController: NavHostController) {
+    var title = ""
+    val currentBackStackEntry by navController.currentBackStackEntryAsState()
+    when(currentBackStackEntry?.destination?.route){
+        "folder" -> title = "폴더"
+        "favorites" -> title = "즐겨찾기"
+        "album" -> title = "앨범"
+        "artist" -> title = "아티스트"
+        "category" -> title = "카테고리"
+        else -> {  }
+    }
 
+    Spacer(modifier = Modifier.padding(10.dp))
 
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        // https://developer.android.com/develop/ui/compose/components/button?hl=ko 버튼에 관하여
+        Row(verticalAlignment = Alignment.CenterVertically){
+            TextButton(
+                onClick = {
+                    navController.popBackStack()
+                },
+                modifier = Modifier.background(Color.Transparent)
+            ) {
+                /* TODO: 검색 화면일 때만 필요하다 and 폴더화면으로만 가는 오류 수정 필요
+                Image(imageVector =
+                    ImageVector.vectorResource(id = R.drawable.ic_arrow_back_white_24),
+                    contentDescription = "뒤로가기")
+                 */
+            }
+
+            Text(text = title)
+        }
+
+        Row{
+            TextButton(
+                onClick = {
+                    /* TODO: 검색 화면 만들기 */
+                },
+                modifier = Modifier.background(Color.Transparent)
+            ){
+                Image(
+                    imageVector = ImageVector.vectorResource(id = R.drawable.ic_search_white_24),
+                    contentDescription = "검색")
+            }
+        }
+    }
 }
 
 @Composable
@@ -134,7 +216,11 @@ fun BottomNavigationBar(viewModel: MainViewModel, navcontroller: NavHostControll
             .padding(start = 10.dp, end = 10.dp, bottom = 5.dp)
             .fillMaxWidth()
     ) {
-        NavigationBar{
+        val backColor = if(SoriBadaApplication.darkTheme.value!!) Color.White else Color.Black
+
+        NavigationBar(
+            modifier = Modifier.clip(shape = RoundedCornerShape(30.dp))
+        ){
             val backStackEntry by navcontroller.currentBackStackEntryAsState()
             val currentRoute = backStackEntry?.destination?.route
 
@@ -160,25 +246,23 @@ fun BottomNavigationBar(viewModel: MainViewModel, navcontroller: NavHostControll
 
         Spacer(modifier = Modifier.padding(5.dp))
 
-        var sumDistance = 0f
+        // 화면의 가로 길이를 구해 1/3 길이로 만들면 될 듯 함
+        val configuration = LocalConfiguration.current
+        val screenWidth = configuration.screenWidthDp.dp
+
         Box(
             modifier = Modifier
-                .fillMaxWidth()
+                .width(screenWidth / 2)
+                .align(Alignment.CenterHorizontally)
                 .aspectRatio(40f)
-                .padding(start = 15.dp, end = 15.dp, bottom = 5.dp)
-                .background(color = Color.Black, shape = RoundedCornerShape(15.dp))
+                .background(
+                    color = backColor,
+                    shape = RoundedCornerShape(15.dp)
+                )
                 .draggable(
                     orientation = Orientation.Vertical,
-                    state = rememberDraggableState {distance ->
+                    state = rememberDraggableState { distance ->
                         viewModel.GoToHome()
-                        /*
-                        sumDistance += distance
-                        if(sumDistance > 100){
-                            sumDistance = 0f
-
-                        }
-
-                         */
                     }
                 )
         )
@@ -189,6 +273,6 @@ fun BottomNavigationBar(viewModel: MainViewModel, navcontroller: NavHostControll
 @Composable
 fun DefaultPreview() {
     SoriBadaTheme {
-
+        
     }
 }

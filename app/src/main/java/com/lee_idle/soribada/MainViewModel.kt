@@ -1,6 +1,9 @@
 package com.lee_idle.soribada
 
 import android.content.Intent
+import android.os.Build
+import android.view.View
+import android.view.WindowInsets
 import androidx.lifecycle.ViewModel
 
 class MainViewModel: ViewModel() {
