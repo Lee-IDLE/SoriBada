@@ -152,15 +152,25 @@ fun TopAppBar(viewModel: MainViewModel, navController: NavHostController) {
         Row(verticalAlignment = Alignment.CenterVertically){
             TextButton(
                 onClick = {
-                    navController.popBackStack()
+                    if(navController.graph.findStartDestination() != currentBackStackEntry?.destination){
+                        navController.popBackStack()
+                    }
+
+                    //navController.navigate(currentBackStackEntry?.destination?.route!!)
+                    /*
+                    navController.navigate(currentBackStackEntry?.destination?.route!!){
+                        popUpTo(navController.graph.id) {
+                            inclusive = true
+                        }
+
+                    }
+                     */
                 },
                 modifier = Modifier.background(Color.Transparent)
             ) {
-                /* TODO: 검색 화면일 때만 필요하다 and 폴더화면으로만 가는 오류 수정 필요
-                Image(imageVector =
-                    ImageVector.vectorResource(id = R.drawable.ic_arrow_back_white_24),
-                    contentDescription = "뒤로가기")
-                 */
+                Image(imageVector = ImageVector.vectorResource(id = R.drawable.ic_arrow_back_white_24),
+                    contentDescription = "뒤로가기"
+                )
             }
 
             Text(text = title)
@@ -229,7 +239,7 @@ fun BottomNavigationBar(viewModel: MainViewModel, navcontroller: NavHostControll
                     selected = currentRoute == navItem.route,
                     onClick = {
                         navcontroller.navigate(navItem.route){
-                            popUpTo(navcontroller.graph.findStartDestination().id){
+                            popUpTo(navcontroller.graph.id){
                                 saveState = true
                             }
                             launchSingleTop = true
