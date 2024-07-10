@@ -264,7 +264,8 @@ fun BottomNavigationBar(viewModel: MainViewModel, navcontroller: NavHostControll
             modifier = Modifier
                 .width(screenWidth / 2)
                 .align(Alignment.CenterHorizontally)
-                .aspectRatio(40f)
+                .aspectRatio(50f)
+                .padding(bottom = 10.dp)
                 .background(
                     color = backColor,
                     shape = RoundedCornerShape(15.dp)
