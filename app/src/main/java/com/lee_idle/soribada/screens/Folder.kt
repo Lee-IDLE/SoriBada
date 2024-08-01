@@ -24,6 +24,7 @@ import androidx.core.graphics.drawable.toBitmap
 import androidx.core.net.toUri
 import com.lee_idle.soribada.R
 import com.lee_idle.soribada.models.FolderListData
+import com.lee_idle.soribada.screens.items.folderItems
 import com.lee_idle.soribada.viewModels.FolderViewModel
 import androidx.compose.runtime.remember as remember
 
@@ -43,6 +44,11 @@ fun Folder() {
 
     val defaultThumbnail: Bitmap? = drawable?.toBitmap()
 
+    val onSelectMusic = { thumbnail: Bitmap, musicData: FolderListData ->
+
+    }
+
+    // 하나하나 다 버튼으로 만들어야 하나?
     LazyColumn(
         state = listState,
         contentPadding = PaddingValues(bottom = 5.dp)
@@ -53,8 +59,12 @@ fun Folder() {
                 val contentUri = ContentUris.withAppendedId(MediaStore.Audio.Albums.EXTERNAL_CONTENT_URI, item.albumID)
                 fileThumbnail = folderViewModel.getThumbnailFromPath(contentUri)
             }
-            //val thumbnail = folderViewModel.getThumbnailFromPath(item.fullPath)
-            listItem(fileThumbnail ?: defaultThumbnail!!, item)
+
+            folderItems(
+                thumbnail = fileThumbnail ?: defaultThumbnail!!,
+                musicData = item,
+                onClicked = onSelectMusic
+            )
         }
     }
 }

@@ -59,7 +59,8 @@ class FolderViewModel: ViewModel() {
                             title = it.name,
                             albumID = 0L,
                             fullPath = it.path,
-                            id = 0
+                            id = 0,
+                            artist = "",
                         ))
                     }else {
                         val mediaData = getFileData(it.absolutePath)
@@ -68,7 +69,8 @@ class FolderViewModel: ViewModel() {
                                 title = mediaData.title,
                                 albumID = mediaData.albumID,
                                 fullPath = mediaData.path,
-                                id = mediaData.id.toLong()
+                                id = mediaData.id.toLong(),
+                                artist = mediaData.artist,
                             ))
                         } else {
                             println("오류: MediaStore가 정보 가져오기 실패 - $it")

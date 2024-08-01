@@ -5,4 +5,5 @@ data class FolderListData(
     val albumID: Long,
     val fullPath: String,
     val id: Long,
+    val artist: String
 )
