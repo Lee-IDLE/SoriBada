@@ -2,50 +2,42 @@ package com.lee_idle.soribada.screens.items
 
 import android.graphics.Bitmap
 import android.graphics.Canvas
-import android.widget.Space
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.asImageBitmap
-import androidx.compose.ui.layout.ModifierLocalBeyondBoundsLayout
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.semantics.Role.Companion.Button
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.content.ContextCompat
 import androidx.core.graphics.drawable.toBitmap
 import com.lee_idle.soribada.R
-import com.lee_idle.soribada.models.FolderListData
+import com.lee_idle.soribada.models.CurrentMusic
+import com.lee_idle.soribada.models.MusicData
 
 @Composable
-fun folderItems(thumbnail: Bitmap, musicData: FolderListData, onClicked: (Bitmap, FolderListData) -> Unit) {
-    var isPlayed by remember { mutableStateOf(false) }
-
+fun folderItems(thumbnail: Bitmap, musicData: MusicData) {
     Row(
         horizontalArrangement = Arrangement.SpaceBetween,
         modifier = Modifier.padding(start = 10.dp, end = 10.dp, top = 5.dp)
             .fillMaxWidth()
             .clickable {
-
+                CurrentMusic.thumbnail = thumbnail
+                CurrentMusic.musicData = musicData
+                CurrentMusic.musicPlayToggle()
             }
     ) {
         // 왼쪽 썸네일, 제목, 아티스트
@@ -73,9 +65,8 @@ fun folderItems(thumbnail: Bitmap, musicData: FolderListData, onClicked: (Bitmap
             }
         }
 
-        // TODO: 노래 재생 관련 기능을 함수 타입으로 전달 받아 실행한다.
         if(musicData.artist.isNotEmpty()){
-            // 오른쪽 재생 버튼
+            // 오른쪽 재생 버튼 TODO: 꼭 필요한지 재고
             Box(
                 contentAlignment = Alignment.Center,
                 modifier = Modifier) {
@@ -108,7 +99,15 @@ fun viewTest() {
     drawable.draw(canvas)
 
     val defaultThumbnail: Bitmap = drawable.toBitmap()
-    val testData = FolderListData(
-        title = "제목", albumID = 0L, fullPath = "/sdcard/Music/", id = 0,artist = "아티스트")
+    val testData = MusicData(
+        id = 0L,
+        title = "테스트 제목",
+        artist = "",
+        albumID = 0L,
+        duration = 0,
+        albumArtist = "",
+        favorite = false,
+        path = "테스트 경로"
+    )
     folderItems(thumbnail = defaultThumbnail, testData)
 }

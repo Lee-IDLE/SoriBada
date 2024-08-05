@@ -1,5 +1,6 @@
 package com.lee_idle.soribada
 
+import android.graphics.Bitmap
 import android.icu.lang.UCharacter.VerticalOrientation
 import android.os.Build
 import android.os.Bundle
@@ -35,6 +36,9 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.ProvidableCompositionLocal
+import androidx.compose.runtime.compositionLocalOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -57,6 +61,8 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import com.lee_idle.soribada.models.CurrentMusic
+import com.lee_idle.soribada.models.MusicData
 import com.lee_idle.soribada.navBar.NavBarItems
 import com.lee_idle.soribada.screens.Album
 import com.lee_idle.soribada.screens.Artist
@@ -216,29 +222,26 @@ fun MainScreen(viewModel: MainViewModel, navController: NavHostController){
         composable(NavRoutes.Category.route){
             Category()
         }
+
     }
 }
 
 @Composable
 fun BottomNavigationBar(viewModel: MainViewModel, navcontroller: NavHostController){
-    var isPlayed by remember { mutableStateOf(false) }
-
-    val onPlayedChange = { played: Boolean ->
-        isPlayed = played
-    }
-
     Column(
         modifier = Modifier
-            .padding(start = 10.dp, end = 10.dp, bottom = 5.dp)
+            .padding(start = 10.dp, end = 10.dp, top = 5.dp, bottom = 5.dp)
             .fillMaxWidth()
     ) {
         val backColor = if(SoriBadaApplication.darkTheme.value!!) Color.White else Color.Black
 
-        if(isPlayed) {
-            Row {
+        if(CurrentMusic.isPlayed.value == true) {
 
-            }
+
+            Spacer(modifier = Modifier.padding(5.dp))
         }
+
+
 
         NavigationBar(
             modifier = Modifier.clip(shape = RoundedCornerShape(30.dp))
@@ -276,8 +279,7 @@ fun BottomNavigationBar(viewModel: MainViewModel, navcontroller: NavHostControll
             modifier = Modifier
                 .width(screenWidth / 2)
                 .align(Alignment.CenterHorizontally)
-                .aspectRatio(50f)
-                .padding(bottom = 10.dp)
+                .aspectRatio(40f)
                 .background(
                     color = backColor,
                     shape = RoundedCornerShape(15.dp)

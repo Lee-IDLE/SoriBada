@@ -12,20 +12,19 @@ import android.os.Environment
 import android.os.storage.StorageManager
 import android.provider.MediaStore
 import android.util.Size
-import androidx.core.net.toUri
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.lee_idle.soribada.SoriBadaApplication
-import com.lee_idle.soribada.models.FolderListData
+import com.lee_idle.soribada.models.MusicData
 import com.lee_idle.soribada.models.MediaData
 import kotlinx.coroutines.launch
 import java.io.File
 
 class FolderViewModel: ViewModel() {
-    private val _folderList = MutableLiveData<List<FolderListData>>()
-    val folderList: LiveData<List<FolderListData>>
+    private val _folderList = MutableLiveData<List<MusicData>>()
+    val folderList: LiveData<List<MusicData>>
         get() = _folderList
 
     private val _fileList = MutableLiveData<List<MediaData>>()
@@ -50,27 +49,33 @@ class FolderViewModel: ViewModel() {
             val directory = File("$path/Music/BGM")
             if (directory.exists() && directory.isDirectory) {
                 val filesAndDirs = directory.listFiles()
-                val tempFolderList = mutableListOf<FolderListData>()
-                val tempFileList = mutableListOf<FolderListData>()
+                val tempFolderList = mutableListOf<MusicData>()
+                val tempFileList = mutableListOf<MusicData>()
 
                 filesAndDirs?.forEach {
                     if(it.isDirectory){
-                        tempFolderList.add(FolderListData(
+                        tempFolderList.add(MusicData(
+                            id = 0L,
                             title = it.name,
-                            albumID = 0L,
-                            fullPath = it.path,
-                            id = 0,
                             artist = "",
+                            albumID = 0L,
+                            duration = 0,
+                            albumArtist = "",
+                            favorite = false,
+                            path = it.path,
                         ))
                     }else {
                         val mediaData = getFileData(it.absolutePath)
                         if (mediaData != null){
-                            tempFileList.add(FolderListData(
-                                title = mediaData.title,
-                                albumID = mediaData.albumID,
-                                fullPath = mediaData.path,
+                            tempFileList.add(MusicData(
                                 id = mediaData.id.toLong(),
+                                title = mediaData.title,
                                 artist = mediaData.artist,
+                                albumID = mediaData.albumID,
+                                duration = mediaData.duration.toInt(),
+                                albumArtist = mediaData.albumArtist,
+                                favorite = false,
+                                path = mediaData.path,
                             ))
                         } else {
                             println("오류: MediaStore가 정보 가져오기 실패 - $it")

@@ -2,7 +2,6 @@ package com.lee_idle.soribada.screens
 
 import android.content.ContentUris
 import android.graphics.Bitmap
-import android.graphics.BitmapFactory
 import android.provider.MediaStore
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.PaddingValues
@@ -10,7 +9,6 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
@@ -21,9 +19,8 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
 import androidx.core.graphics.drawable.toBitmap
-import androidx.core.net.toUri
 import com.lee_idle.soribada.R
-import com.lee_idle.soribada.models.FolderListData
+import com.lee_idle.soribada.models.MusicData
 import com.lee_idle.soribada.screens.items.folderItems
 import com.lee_idle.soribada.viewModels.FolderViewModel
 import androidx.compose.runtime.remember as remember
@@ -44,10 +41,6 @@ fun Folder() {
 
     val defaultThumbnail: Bitmap? = drawable?.toBitmap()
 
-    val onSelectMusic = { thumbnail: Bitmap, musicData: FolderListData ->
-
-    }
-
     // 하나하나 다 버튼으로 만들어야 하나?
     LazyColumn(
         state = listState,
@@ -62,15 +55,14 @@ fun Folder() {
 
             folderItems(
                 thumbnail = fileThumbnail ?: defaultThumbnail!!,
-                musicData = item,
-                onClicked = onSelectMusic
+                musicData = item
             )
         }
     }
 }
 
 @Composable
-fun listItem(thumbnail: Bitmap, item: FolderListData){
+fun listItem(thumbnail: Bitmap, item: MusicData){
     Row{
         Image(bitmap = thumbnail.asImageBitmap(), contentDescription = "thumbnail")
     }
