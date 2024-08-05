@@ -27,7 +27,9 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.NavigationBar
@@ -40,6 +42,7 @@ import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.ProvidableCompositionLocal
 import androidx.compose.runtime.compositionLocalOf
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -47,6 +50,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.vectorResource
@@ -228,6 +232,8 @@ fun MainScreen(viewModel: MainViewModel, navController: NavHostController){
 
 @Composable
 fun BottomNavigationBar(viewModel: MainViewModel, navcontroller: NavHostController){
+    val musicPlayed by CurrentMusic.isPlayed.observeAsState(false)
+
     Column(
         modifier = Modifier
             .padding(start = 10.dp, end = 10.dp, top = 5.dp, bottom = 5.dp)
@@ -235,13 +241,39 @@ fun BottomNavigationBar(viewModel: MainViewModel, navcontroller: NavHostControll
     ) {
         val backColor = if(SoriBadaApplication.darkTheme.value!!) Color.White else Color.Black
 
-        if(CurrentMusic.isPlayed.value == true) {
+        if(musicPlayed) {
+            Box(
+                modifier = Modifier.clip(shape = RoundedCornerShape(15.dp))
+            ){
+                Row(
+                    horizontalArrangement = Arrangement.spacedBy(10.dp)
+                ) {
+                    if(CurrentMusic.thumbnail != null){
+                        Image(
+                            bitmap = CurrentMusic.thumbnail!!.asImageBitmap(),
+                            contentDescription = "Thumbnail",
+                            modifier = Modifier.size(50.dp, 50.dp)
+                        )
+                    }
 
+                    Text(text = CurrentMusic.musicData!!.title)
+
+                    Box(
+                        contentAlignment = Alignment.Center,
+                        modifier = Modifier) {
+                        Button(
+                            onClick = { /*TODO*/ },
+                            shape = CircleShape,
+                            modifier = Modifier.size(40.dp, 40.dp),
+                        ){
+
+                        }
+                    }
+                }
+            }
 
             Spacer(modifier = Modifier.padding(5.dp))
         }
-
-
 
         NavigationBar(
             modifier = Modifier.clip(shape = RoundedCornerShape(30.dp))
