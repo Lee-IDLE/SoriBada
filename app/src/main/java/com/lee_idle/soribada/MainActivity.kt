@@ -73,6 +73,7 @@ import com.lee_idle.soribada.screens.Artist
 import com.lee_idle.soribada.screens.Category
 import com.lee_idle.soribada.screens.Favorites
 import com.lee_idle.soribada.screens.Folder
+import com.lee_idle.soribada.screens.items.CurrentMusicUI
 import com.lee_idle.soribada.ui.theme.SoriBadaTheme
 
 class MainActivity : ComponentActivity() {
@@ -232,7 +233,7 @@ fun MainScreen(viewModel: MainViewModel, navController: NavHostController){
 
 @Composable
 fun BottomNavigationBar(viewModel: MainViewModel, navcontroller: NavHostController){
-    val musicPlayed by CurrentMusic.isPlayed.observeAsState(false)
+    val currentMusicData by CurrentMusic.musicData.observeAsState(null)
 
     Column(
         modifier = Modifier
@@ -241,35 +242,11 @@ fun BottomNavigationBar(viewModel: MainViewModel, navcontroller: NavHostControll
     ) {
         val backColor = if(SoriBadaApplication.darkTheme.value!!) Color.White else Color.Black
 
-        if(musicPlayed) {
+        if(currentMusicData != null) {
             Box(
                 modifier = Modifier.clip(shape = RoundedCornerShape(15.dp))
             ){
-                Row(
-                    horizontalArrangement = Arrangement.spacedBy(10.dp)
-                ) {
-                    if(CurrentMusic.thumbnail != null){
-                        Image(
-                            bitmap = CurrentMusic.thumbnail!!.asImageBitmap(),
-                            contentDescription = "Thumbnail",
-                            modifier = Modifier.size(50.dp, 50.dp)
-                        )
-                    }
-
-                    Text(text = CurrentMusic.musicData!!.title)
-
-                    Box(
-                        contentAlignment = Alignment.Center,
-                        modifier = Modifier) {
-                        Button(
-                            onClick = { /*TODO*/ },
-                            shape = CircleShape,
-                            modifier = Modifier.size(40.dp, 40.dp),
-                        ){
-
-                        }
-                    }
-                }
+                CurrentMusicUI()
             }
 
             Spacer(modifier = Modifier.padding(5.dp))

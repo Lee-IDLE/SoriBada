@@ -36,7 +36,7 @@ fun folderItems(thumbnail: Bitmap, musicData: MusicData) {
             .fillMaxWidth()
             .clickable {
                 CurrentMusic.thumbnail = thumbnail
-                CurrentMusic.musicData = musicData
+                CurrentMusic.setMusicData(musicData)
                 CurrentMusic.musicPlayToggle()
             }
     ) {

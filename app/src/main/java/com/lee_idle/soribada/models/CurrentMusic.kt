@@ -11,7 +11,15 @@ import androidx.lifecycle.MutableLiveData
 
 object CurrentMusic {
     var thumbnail: Bitmap? = null
-    var musicData: MusicData? = null
+
+    private val _musicData: MutableLiveData<MusicData?> = MutableLiveData(null)
+    val musicData: LiveData<MusicData?>
+        get() = _musicData
+
+    fun setMusicData(data: MusicData) {
+        _musicData.value = data
+    }
+
     private var _isPlayed = MutableLiveData(false)
     val isPlayed: LiveData<Boolean>
         get()= _isPlayed
@@ -26,12 +34,18 @@ object CurrentMusic {
         }
     }
 
+    // TODO: 정지 후 다시 시작시 처음부터 시작함 수정 필요
     private fun musicPlay() {
         mediaPlayer?.release() // 기존에 재생 중인 음악 해제
         mediaPlayer = MediaPlayer().apply{
-            setDataSource(musicData?.path)
+            setDataSource(musicData.value?.path)
             prepare()
             start()
         }
+    }
+
+    fun musicPause() {
+        mediaPlayer?.pause()
+        musicPlayToggle()
     }
 }
