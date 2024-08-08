@@ -35,9 +35,9 @@ fun folderItems(thumbnail: Bitmap, musicData: MusicData) {
         modifier = Modifier.padding(start = 10.dp, end = 10.dp, top = 5.dp)
             .fillMaxWidth()
             .clickable {
-                CurrentMusic.thumbnail = thumbnail
+                CurrentMusic.setTumbnail(thumbnail)
                 CurrentMusic.setMusicData(musicData)
-                CurrentMusic.musicPlayToggle()
+                CurrentMusic.musicPlay()
             }
     ) {
         // 왼쪽 썸네일, 제목, 아티스트

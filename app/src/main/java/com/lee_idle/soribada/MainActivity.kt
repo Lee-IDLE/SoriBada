@@ -243,17 +243,14 @@ fun BottomNavigationBar(viewModel: MainViewModel, navcontroller: NavHostControll
         val backColor = if(SoriBadaApplication.darkTheme.value!!) Color.White else Color.Black
 
         if(currentMusicData != null) {
-            Box(
-                modifier = Modifier.clip(shape = RoundedCornerShape(15.dp))
-            ){
-                CurrentMusicUI()
-            }
+            CurrentMusicUI()
 
             Spacer(modifier = Modifier.padding(5.dp))
         }
 
         NavigationBar(
-            modifier = Modifier.clip(shape = RoundedCornerShape(30.dp))
+            modifier = Modifier.clip(shape = RoundedCornerShape(15.dp))
+                .aspectRatio(10F/1.3F)
         ){
             val backStackEntry by navcontroller.currentBackStackEntryAsState()
             val currentRoute = backStackEntry?.destination?.route
@@ -310,13 +307,3 @@ fun DefaultPreview() {
 
     }
 }
-
-
-/*
-    [240801] TODO:
-    1. 노래 실행 구조 변경
-    - MainActivity에서 CompositionLocal을 사용해 폴더, 취향, 아티스트 등에 현재 실행 노래 정보(썸네일, 파일정보)
-    등을 변경하는 람다를 전달하고, 노래를 눌러 실행하면 해당 정보들을 변경하도록 한다.
-    - 현재 FolderListData라는 이름으로 노래 정보(Model)을 구현해 놨는데 이름 바꾸고, FolderViewModel에서
-    가져오는 노래 정보들 모두 저장하도록 변경
- */

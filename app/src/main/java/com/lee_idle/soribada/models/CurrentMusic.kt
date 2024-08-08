@@ -2,15 +2,17 @@ package com.lee_idle.soribada.models
 
 import android.graphics.Bitmap
 import android.media.MediaPlayer
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 
 object CurrentMusic {
-    var thumbnail: Bitmap? = null
+    private val _thumbnail: MutableLiveData<Bitmap?> = MutableLiveData(null)
+    val thumbnail: LiveData<Bitmap?>
+        get() = _thumbnail
+
+    fun setTumbnail(thumbnail: Bitmap) {
+        _thumbnail.value = thumbnail
+    }
 
     private val _musicData: MutableLiveData<MusicData?> = MutableLiveData(null)
     val musicData: LiveData<MusicData?>
@@ -18,34 +20,38 @@ object CurrentMusic {
 
     fun setMusicData(data: MusicData) {
         _musicData.value = data
+        _mediaPlayer?.release() // 기존에 재생 중인 음악 해제
+        _mediaPlayer = null
     }
 
     private var _isPlayed = MutableLiveData(false)
     val isPlayed: LiveData<Boolean>
         get()= _isPlayed
 
-    private var mediaPlayer: MediaPlayer? = null
-    fun musicPlayToggle() {
-        if(_isPlayed.value == true) {
-            _isPlayed.value = false
-        } else {
-            _isPlayed.value = true
-            musicPlay()
-        }
-    }
+    private var _mediaPlayer: MediaPlayer? = null
+    public val mediaPlayer: MediaPlayer?
+        get() = _mediaPlayer
 
-    // TODO: 정지 후 다시 시작시 처음부터 시작함 수정 필요
-    private fun musicPlay() {
-        mediaPlayer?.release() // 기존에 재생 중인 음악 해제
-        mediaPlayer = MediaPlayer().apply{
-            setDataSource(musicData.value?.path)
-            prepare()
-            start()
+    fun musicPlay() {
+        /*
+        _mediaPlayer 값이 있는데 노래 재생을 하는 경우는 정지 후 다시 재생하는 경우다.
+        _mediaPlayer 값이 없는데 노래 재생을 하는 경우 해당 노래를 처음으로 재생하는 경우다.
+         */
+        if(_mediaPlayer != null){
+            _mediaPlayer?.start()
+        } else {
+            _mediaPlayer = MediaPlayer().apply{
+                setDataSource(musicData.value?.path)
+                prepare()
+                start()
+            }
         }
+
+        _isPlayed.value = true
     }
 
     fun musicPause() {
-        mediaPlayer?.pause()
-        musicPlayToggle()
+        _mediaPlayer?.pause()
+        _isPlayed.value = false
     }
 }
