@@ -75,7 +75,8 @@ fun Folder() {
 
             folderItems(
                 thumbnail = sendThumbnail!!,
-                musicData = item
+                musicData = item,
+                folderViewModel = folderViewModel
             )
         }
     }

@@ -25,19 +25,26 @@ import androidx.compose.ui.unit.sp
 import androidx.core.content.ContextCompat
 import androidx.core.graphics.drawable.toBitmap
 import com.lee_idle.soribada.R
-import com.lee_idle.soribada.models.CurrentMusic
+import com.lee_idle.soribada.objectClass.CurrentMusic
 import com.lee_idle.soribada.models.MusicData
+import com.lee_idle.soribada.viewModels.FolderViewModel
 
 @Composable
-fun folderItems(thumbnail: Bitmap, musicData: MusicData) {
+fun folderItems(thumbnail: Bitmap, musicData: MusicData, folderViewModel: FolderViewModel) {
     Row(
         horizontalArrangement = Arrangement.SpaceBetween,
         modifier = Modifier.padding(start = 10.dp, end = 10.dp, top = 5.dp)
             .fillMaxWidth()
             .clickable {
-                CurrentMusic.setTumbnail(thumbnail)
-                CurrentMusic.setMusicData(musicData)
-                CurrentMusic.musicPlay()
+                if(musicData.id == 0L){
+                    // 폴더인 경우
+                    folderViewModel.getListFromDirectory(musicData.path)
+                } else {
+                    // 음원 파일인 경우
+                    CurrentMusic.setTumbnail(thumbnail)
+                    CurrentMusic.setMusicData(musicData)
+                    CurrentMusic.musicPlay()
+                }
             }
     ) {
         // 왼쪽 썸네일, 제목, 아티스트
@@ -109,5 +116,7 @@ fun viewTest() {
         favorite = false,
         path = "테스트 경로"
     )
-    folderItems(thumbnail = defaultThumbnail, testData)
+
+    val folderViewModel = FolderViewModel()
+    folderItems(thumbnail = defaultThumbnail, testData, folderViewModel)
 }

@@ -7,9 +7,6 @@ import android.view.WindowInsets
 import androidx.lifecycle.ViewModel
 
 class MainViewModel: ViewModel() {
-    init{
-
-    }
 
     fun GoToHome(){
         val intent = Intent(Intent.ACTION_MAIN).apply {

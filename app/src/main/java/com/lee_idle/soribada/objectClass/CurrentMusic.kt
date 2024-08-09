@@ -1,9 +1,10 @@
-package com.lee_idle.soribada.models
+package com.lee_idle.soribada.objectClass
 
 import android.graphics.Bitmap
 import android.media.MediaPlayer
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
+import com.lee_idle.soribada.models.MusicData
 
 object CurrentMusic {
     private val _thumbnail: MutableLiveData<Bitmap?> = MutableLiveData(null)

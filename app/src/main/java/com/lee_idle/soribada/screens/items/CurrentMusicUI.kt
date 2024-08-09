@@ -1,18 +1,15 @@
 package com.lee_idle.soribada.screens.items
 
-import android.widget.ImageButton
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Button
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.Text
@@ -28,14 +25,11 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.asImageBitmap
-import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.lee_idle.soribada.R
-import com.lee_idle.soribada.models.CurrentMusic
-import com.lee_idle.soribada.models.MusicData
-import kotlinx.coroutines.Dispatchers
+import com.lee_idle.soribada.objectClass.CurrentMusic
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlin.math.round
@@ -48,9 +42,10 @@ fun CurrentMusicUI(){
     val coroutineScope = rememberCoroutineScope()
 
     Column(
-        modifier = Modifier.clip(shape = RoundedCornerShape(15.dp))
+        modifier = Modifier
+            .clip(shape = RoundedCornerShape(15.dp))
             .fillMaxWidth()
-            .aspectRatio(10F/1.3F)
+            .aspectRatio(10F / 1.3F)
     ){
         LinearProgressIndicator(
             progress = progressValue,
@@ -72,23 +67,30 @@ fun CurrentMusicUI(){
             verticalAlignment = Alignment.CenterVertically,
             modifier = Modifier.fillMaxWidth()
         ){
-            Row{
+            Row(
+                modifier = Modifier.weight(5F)
+            ){
                 if(currentMusicThumbnail != null){
                     Image(
                         bitmap = currentMusicThumbnail!!.asImageBitmap(),
                         contentDescription = "Thumbnail",
-                        modifier = Modifier.fillMaxHeight()
-                            .aspectRatio(1F)
+                        modifier = Modifier
+                            .fillMaxHeight()
+                            .aspectRatio(1F / 1F)
+                            .padding(3.dp)
                     )
                 }
 
                 Text(
                     text = currentMusicData!!.title,
                     fontSize = 20.sp,
+                    maxLines = 1
                     )
             }
 
-            Row{
+            Row(
+                modifier = Modifier.weight(3F)
+            ){
                 // previouse button
                 IconButton(
                     onClick = { /*TODO*/ },

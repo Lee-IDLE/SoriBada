@@ -19,6 +19,7 @@ import androidx.lifecycle.viewModelScope
 import com.lee_idle.soribada.SoriBadaApplication
 import com.lee_idle.soribada.models.MusicData
 import com.lee_idle.soribada.models.MediaData
+import com.lee_idle.soribada.objectClass.BackFuntion
 import kotlinx.coroutines.launch
 import java.io.File
 
@@ -31,22 +32,29 @@ class FolderViewModel: ViewModel() {
     val fileList: LiveData<List<MediaData>>
         get() = _fileList
 
+    private var currentPath: String = ""
+
     init{
-        getListFromDirectory()
+        // 경로: https://paulaner80.tistory.com/entry/%EC%95%88%EB%93%9C%EB%A1%9C%EC%9D%B4%EB%93%9C-%EA%B2%BD%EB%A1%9C
+        //SoriBadaApplication.instance.getExternalFilesDir(Environment.DIRECTORY_MUSIC)
+        val path: String = if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.R){
+            val manager = SoriBadaApplication.instance.getSystemService(Context.STORAGE_SERVICE) as StorageManager
+            manager.primaryStorageVolume.directory?.absolutePath ?: ""
+        } else {
+            Environment.getExternalStorageDirectory().absolutePath
+        }
+        val defaultPath = "$path/Music"
+        getListFromDirectory(defaultPath)
+
+        BackFuntion.setBackTraceFuntion {
+            getListFromDirectory(currentPath.substringBeforeLast("/"))
+        }
     }
 
-    private fun getListFromDirectory(){
+    fun getListFromDirectory(path: String){
         viewModelScope.launch {
-            // 경로: https://paulaner80.tistory.com/entry/%EC%95%88%EB%93%9C%EB%A1%9C%EC%9D%B4%EB%93%9C-%EA%B2%BD%EB%A1%9C
-            //SoriBadaApplication.instance.getExternalFilesDir(Environment.DIRECTORY_MUSIC)
-            val path: String = if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.R){
-                val manager = SoriBadaApplication.instance.getSystemService(Context.STORAGE_SERVICE) as StorageManager
-                manager.primaryStorageVolume.directory?.absolutePath ?: ""
-            } else {
-                Environment.getExternalStorageDirectory().absolutePath
-            }
-
-            val directory = File("$path/Music/BGM")
+            currentPath = path
+            val directory = File(path)
             if (directory.exists() && directory.isDirectory) {
                 val filesAndDirs = directory.listFiles()
                 val tempFolderList = mutableListOf<MusicData>()
