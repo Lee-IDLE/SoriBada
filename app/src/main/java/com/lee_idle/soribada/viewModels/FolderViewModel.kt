@@ -34,6 +34,8 @@ class FolderViewModel: ViewModel() {
 
     private var currentPath: String = ""
 
+    private var defaultPath = ""
+
     init{
         // 경로: https://paulaner80.tistory.com/entry/%EC%95%88%EB%93%9C%EB%A1%9C%EC%9D%B4%EB%93%9C-%EA%B2%BD%EB%A1%9C
         //SoriBadaApplication.instance.getExternalFilesDir(Environment.DIRECTORY_MUSIC)
@@ -43,7 +45,9 @@ class FolderViewModel: ViewModel() {
         } else {
             Environment.getExternalStorageDirectory().absolutePath
         }
-        val defaultPath = "$path/Music"
+
+        defaultPath = "$path/Music"
+
         getListFromDirectory(defaultPath)
 
         BackFuntion.setBackTraceFuntion {
@@ -54,6 +58,13 @@ class FolderViewModel: ViewModel() {
     fun getListFromDirectory(path: String){
         viewModelScope.launch {
             currentPath = path
+
+            // 기본경로에 도달했다면 뒤로가기 버튼 비활성화
+            if(currentPath == defaultPath)
+                BackFuntion.setPossible(false)
+            else
+                BackFuntion.setPossible(true)
+
             val directory = File(path)
             if (directory.exists() && directory.isDirectory) {
                 val filesAndDirs = directory.listFiles()
@@ -62,6 +73,10 @@ class FolderViewModel: ViewModel() {
 
                 filesAndDirs?.forEach {
                     if(it.isDirectory){
+                        // 폴더 중 . 으로 시작하는 폴더는 건너뛴다
+                        if(it.name.startsWith("."))
+                            return@forEach
+
                         tempFolderList.add(MusicData(
                             id = 0L,
                             title = it.name,

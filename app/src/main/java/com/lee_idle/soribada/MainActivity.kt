@@ -20,6 +20,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
@@ -135,10 +136,13 @@ fun TopAppBar(viewModel: MainViewModel, navController: NavHostController) {
         else -> {  }
     }
 
+    val isBackPossible by BackFuntion.isPossible.observeAsState(false)
+
     Spacer(modifier = Modifier.padding(10.dp))
 
     Row(
-        modifier = Modifier.fillMaxWidth(),
+        modifier = Modifier.fillMaxWidth()
+            .height(50.dp),
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically
     ) {
@@ -162,16 +166,22 @@ fun TopAppBar(viewModel: MainViewModel, navController: NavHostController) {
                 },
                 modifier = Modifier.background(Color.Transparent)
             ) {
-                IconButton(
-                    onClick = {
-                        BackFuntion.backTraceFuntion?.invoke()
-                    },
-                ){
-                    Image(
-                        imageVector = ImageVector.vectorResource(
-                            id = R.drawable.ic_arrow_back_white_24),
-                        contentDescription = "뒤로가기"
-                    )
+                if(isBackPossible){
+                    IconButton(
+                        onClick = {
+                            BackFuntion.backTraceFuntion?.invoke()
+                        },
+                        modifier = Modifier.align(Alignment.CenterVertically)
+                            .width(30.dp)
+                    ){
+                        Image(
+                            imageVector = ImageVector.vectorResource(
+                                id = R.drawable.ic_arrow_back_white_24),
+                            contentDescription = "뒤로가기",
+                        )
+                    }
+                } else {
+                    Spacer(modifier = Modifier.width(30.dp))
                 }
             }
 
@@ -240,8 +250,9 @@ fun BottomNavigationBar(viewModel: MainViewModel, navcontroller: NavHostControll
         }
 
         NavigationBar(
-            modifier = Modifier.clip(shape = RoundedCornerShape(15.dp))
-                .aspectRatio(10F/1.3F)
+            modifier = Modifier
+                .clip(shape = RoundedCornerShape(15.dp))
+                .aspectRatio(10F / 1.3F)
         ){
             val backStackEntry by navcontroller.currentBackStackEntryAsState()
             val currentRoute = backStackEntry?.destination?.route
