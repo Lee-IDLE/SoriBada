@@ -9,4 +9,5 @@ data class MusicData(
     val albumArtist: String,
     val favorite: Boolean,
     val path: String,
+    val index: Int
 )

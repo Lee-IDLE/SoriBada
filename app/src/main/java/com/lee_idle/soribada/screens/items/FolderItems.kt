@@ -114,7 +114,8 @@ fun viewTest() {
         duration = 0,
         albumArtist = "",
         favorite = false,
-        path = "테스트 경로"
+        path = "테스트 경로",
+        index = 0,
     )
 
     val folderViewModel = FolderViewModel()

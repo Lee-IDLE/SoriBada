@@ -93,7 +93,9 @@ fun CurrentMusicUI(){
             ){
                 // previouse button
                 IconButton(
-                    onClick = { /*TODO*/ },
+                    onClick = {
+                              CurrentMusic.prevMusic()
+                              },
                 ){
                     Image(
                         painter = painterResource(id = R.drawable.ic_skip_previous_white_24),
@@ -121,7 +123,9 @@ fun CurrentMusicUI(){
 
                 // next button
                 IconButton(
-                    onClick = { /*TODO*/ },
+                    onClick = {
+                              CurrentMusic.nextMusic()
+                              },
                 ) {
                     Image(
                         painter = painterResource(id = R.drawable.ic_skip_next_white_24),

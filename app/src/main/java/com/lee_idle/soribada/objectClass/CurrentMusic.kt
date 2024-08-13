@@ -30,8 +30,47 @@ object CurrentMusic {
         get()= _isPlayed
 
     private var _mediaPlayer: MediaPlayer? = null
-    public val mediaPlayer: MediaPlayer?
+    val mediaPlayer: MediaPlayer?
         get() = _mediaPlayer
+
+    // 플레이 순서 목록
+    private val _playListOrder: ArrayList<Int> = ArrayList()
+    private var currentIndex = 0;
+
+    private fun currentIndexInc() {
+        currentIndex++
+
+        if (currentIndex >= _playListOrder.size)
+            currentIndex = 0
+    }
+
+    private fun currentIndexDec() {
+        currentIndex--
+
+        if (currentIndex < 0)
+            currentIndex = _playListOrder.size - 1
+    }
+
+    fun addPlayListIndex(item: Int) {
+        _playListOrder.add(item)
+    }
+
+    fun clearPlayListIndex() {
+        _playListOrder.clear()
+    }
+
+    // 현재 플레이 리스트에 있는 음악 목록
+    private val _currentMusicList = ArrayList<MusicData>()
+    val currentMusicList: ArrayList<MusicData>
+        get() = _currentMusicList
+
+    fun addCurrentMusicList(item: MusicData) {
+        _currentMusicList.add(item)
+    }
+
+    fun clearCurrentMusicList() {
+        _currentMusicList.clear()
+    }
 
     fun musicPlay() {
         /*
@@ -55,13 +94,27 @@ object CurrentMusic {
         _mediaPlayer?.pause()
         _isPlayed.value = false
     }
-    /* TODO:
-    노래 정보에 Index를 넣는거야. 폴더에서 위 부터 아래로 1..n 까지 Index를 넣는거지.
-    그리고 순서 재생 때는 이전 노래 하면 Index를 -1 시키고 다음 노래 하면 +1 시키는 거야.
 
-    셔플일 때는 이전 노래들을 '덱'에 넣고 최대 크기를 50 정도로 설정한 다음
-    (왼쪽 출력, 오른쪽 삽입 으로 했을 때)
-    삽입한 노래의 갯수가 50을 넘어가려고 하면 왼쪽에서 출력시키고,
-    이전 노래를 누르면 오른쪽에서 출력을 시키자.
-     */
+    fun nextMusic() {
+        currentIndexInc()
+        _currentMusicList[currentIndex].let {
+            /* TODO:
+                현재 Folder에 (썸네일, 음악 정보) 이렇게 따로 있는데 해당 음악 Row를 선택하면 거기서
+                썸네일과 음악 정보를 꺼내와 음악을 실행하고 있다.
+                그런데 문제는, 현재 실행중인 음악(CurrentMusic)에서 다음 노래를 실행할 때 다음 노래의
+                음악 정보는 가져왔지만 썸네일 정보가 없다!
+                따라서 구조를 변경할 필요가 있다.
+                CurrentMusic에 있는 currentMusicList에(MusicData 타입이다) 노래 정보가 있으니까
+                MusicData타입에 썸네일을 넣어야 할 것 같다.
+             */
+            // 음원 파일인 경우
+            //setTumbnail(it)
+            setMusicData(it)
+            musicPlay()
+        }
+    }
+
+    fun prevMusic() {
+        currentIndexDec()
+    }
 }

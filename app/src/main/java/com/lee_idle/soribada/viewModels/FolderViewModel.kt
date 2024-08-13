@@ -20,8 +20,10 @@ import com.lee_idle.soribada.SoriBadaApplication
 import com.lee_idle.soribada.models.MusicData
 import com.lee_idle.soribada.models.MediaData
 import com.lee_idle.soribada.objectClass.BackFuntion
+import com.lee_idle.soribada.objectClass.CurrentMusic
 import kotlinx.coroutines.launch
 import java.io.File
+import kotlin.random.Random
 
 class FolderViewModel: ViewModel() {
     private val _folderList = MutableLiveData<List<MusicData>>()
@@ -69,8 +71,9 @@ class FolderViewModel: ViewModel() {
             if (directory.exists() && directory.isDirectory) {
                 val filesAndDirs = directory.listFiles()
                 val tempFolderList = mutableListOf<MusicData>()
-                val tempFileList = mutableListOf<MusicData>()
 
+                CurrentMusic.clearPlayListIndex()
+                var musicCnt = 0;
                 filesAndDirs?.forEach {
                     if(it.isDirectory){
                         // 폴더 중 . 으로 시작하는 폴더는 건너뛴다
@@ -86,11 +89,12 @@ class FolderViewModel: ViewModel() {
                             albumArtist = "",
                             favorite = false,
                             path = it.path,
+                            index = -1
                         ))
                     }else {
                         val mediaData = getFileData(it.absolutePath)
                         if (mediaData != null){
-                            tempFileList.add(MusicData(
+                            CurrentMusic.addCurrentMusicList(MusicData(
                                 id = mediaData.id.toLong(),
                                 title = mediaData.title,
                                 artist = mediaData.artist,
@@ -99,6 +103,7 @@ class FolderViewModel: ViewModel() {
                                 albumArtist = mediaData.albumArtist,
                                 favorite = false,
                                 path = mediaData.path,
+                                index = musicCnt++
                             ))
                         } else {
                             println("오류: MediaStore가 정보 가져오기 실패 - $it")
@@ -106,7 +111,12 @@ class FolderViewModel: ViewModel() {
                     }
                     println("파일명: ${it.name}")
                 }
-                _folderList.value = tempFolderList + tempFileList
+                _folderList.value = tempFolderList + CurrentMusic.currentMusicList
+
+                for (n in 0 until musicCnt) {
+                    val ranNum = Random.nextInt(musicCnt)
+                    CurrentMusic.addPlayListIndex(ranNum)
+                }
             }
         }
     }
