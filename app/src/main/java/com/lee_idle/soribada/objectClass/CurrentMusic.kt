@@ -7,6 +7,7 @@ import androidx.lifecycle.MutableLiveData
 import com.lee_idle.soribada.models.MusicData
 
 object CurrentMusic {
+    // 썸네일
     private val _thumbnail: MutableLiveData<Bitmap?> = MutableLiveData(null)
     val thumbnail: LiveData<Bitmap?>
         get() = _thumbnail
@@ -15,6 +16,7 @@ object CurrentMusic {
         _thumbnail.value = thumbnail
     }
 
+    // 현재 실행중인 음악의 정보
     private val _musicData: MutableLiveData<MusicData?> = MutableLiveData(null)
     val musicData: LiveData<MusicData?>
         get() = _musicData
@@ -24,7 +26,8 @@ object CurrentMusic {
         _mediaPlayer?.release() // 기존에 재생 중인 음악 해제
         _mediaPlayer = null
     }
-
+    
+    // 실행 여부
     private var _isPlayed = MutableLiveData(false)
     val isPlayed: LiveData<Boolean>
         get()= _isPlayed
@@ -55,15 +58,18 @@ object CurrentMusic {
         _playListOrder.add(item)
     }
 
-    fun clearPlayListIndex() {
+    fun clearPlayListOrder() {
         _playListOrder.clear()
     }
 
     // 현재 플레이 리스트에 있는 음악 목록
-    private val _currentMusicList = ArrayList<MusicData>()
-    val currentMusicList: ArrayList<MusicData>
+    private var _currentMusicList = mutableListOf<MusicData>()
+    val currentMusicList: MutableList<MusicData>
         get() = _currentMusicList
 
+    fun setCurrentMusicList(list: List<MusicData>){
+        _currentMusicList = list.toMutableList()
+    }
     fun addCurrentMusicList(item: MusicData) {
         _currentMusicList.add(item)
     }

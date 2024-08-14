@@ -1,5 +1,6 @@
 package com.lee_idle.soribada.viewModels
 
+import android.content.ContentUris
 import android.content.Context
 import android.database.Cursor
 import android.graphics.Bitmap
@@ -12,27 +13,28 @@ import android.os.Environment
 import android.os.storage.StorageManager
 import android.provider.MediaStore
 import android.util.Size
+import androidx.core.content.ContextCompat
+import androidx.core.graphics.drawable.toBitmap
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.lee_idle.soribada.R
 import com.lee_idle.soribada.SoriBadaApplication
 import com.lee_idle.soribada.models.MusicData
-import com.lee_idle.soribada.models.MediaData
 import com.lee_idle.soribada.objectClass.BackFuntion
 import com.lee_idle.soribada.objectClass.CurrentMusic
 import kotlinx.coroutines.launch
 import java.io.File
-import kotlin.random.Random
 
 class FolderViewModel: ViewModel() {
-    private val _folderList = MutableLiveData<List<MusicData>>()
-    val folderList: LiveData<List<MusicData>>
-        get() = _folderList
+    // 디렉토리 + 파일 목록
+    private val _totalList = MutableLiveData<List<MusicData>>()
+    val totalList: LiveData<List<MusicData>>
+        get() = _totalList
 
-    private val _fileList = MutableLiveData<List<MediaData>>()
-    val fileList: LiveData<List<MediaData>>
-        get() = _fileList
+    // 파일 목록
+    var fileList = mutableListOf<MusicData>()
 
     private var currentPath: String = ""
 
@@ -59,6 +61,9 @@ class FolderViewModel: ViewModel() {
 
     fun getListFromDirectory(path: String){
         viewModelScope.launch {
+            // 기존 정보 초기화
+            _totalList.value = emptyList()
+            fileList.clear()
             currentPath = path
 
             // 기본경로에 도달했다면 뒤로가기 버튼 비활성화
@@ -72,15 +77,24 @@ class FolderViewModel: ViewModel() {
                 val filesAndDirs = directory.listFiles()
                 val tempFolderList = mutableListOf<MusicData>()
 
-                CurrentMusic.clearPlayListIndex()
-                var musicCnt = 0;
+                CurrentMusic.clearPlayListOrder()
+
+                var musicCnt = 0
                 filesAndDirs?.forEach {
                     if(it.isDirectory){
                         // 폴더 중 . 으로 시작하는 폴더는 건너뛴다
                         if(it.name.startsWith("."))
                             return@forEach
 
+                        // 폴더 기본 이미지
+                        val folderDrawable = ContextCompat.getDrawable(
+                            SoriBadaApplication.instance, R.drawable.ic_folder_white_24)
+                        folderDrawable?.let { convertDrawableToBitmap(it) }
+
+                        val folderThumbnail: Bitmap? = folderDrawable?.toBitmap()
+
                         tempFolderList.add(MusicData(
+                            thumbnail = folderThumbnail,
                             id = 0L,
                             title = it.name,
                             artist = "",
@@ -92,31 +106,32 @@ class FolderViewModel: ViewModel() {
                             index = -1
                         ))
                     }else {
-                        val mediaData = getFileData(it.absolutePath)
-                        if (mediaData != null){
-                            CurrentMusic.addCurrentMusicList(MusicData(
-                                id = mediaData.id.toLong(),
-                                title = mediaData.title,
-                                artist = mediaData.artist,
-                                albumID = mediaData.albumID,
-                                duration = mediaData.duration.toInt(),
-                                albumArtist = mediaData.albumArtist,
+                        val musicData = getFileData(it.absolutePath)
+
+                        if (musicData != null){
+
+                            val mediaData = MusicData(
+                                thumbnail = musicData.thumbnail,
+                                id = musicData.id.toLong(),
+                                title = musicData.title,
+                                artist = musicData.artist,
+                                albumID = musicData.albumID,
+                                duration = musicData.duration.toInt(),
+                                albumArtist = musicData.albumArtist,
                                 favorite = false,
-                                path = mediaData.path,
+                                path = musicData.path,
                                 index = musicCnt++
-                            ))
+                            )
+
+                            fileList.add(mediaData)
+                            CurrentMusic.addCurrentMusicList(mediaData)
                         } else {
                             println("오류: MediaStore가 정보 가져오기 실패 - $it")
                         }
                     }
                     println("파일명: ${it.name}")
                 }
-                _folderList.value = tempFolderList + CurrentMusic.currentMusicList
-
-                for (n in 0 until musicCnt) {
-                    val ranNum = Random.nextInt(musicCnt)
-                    CurrentMusic.addPlayListIndex(ranNum)
-                }
+                _totalList.value = tempFolderList + fileList
             }
         }
     }
@@ -127,7 +142,7 @@ class FolderViewModel: ViewModel() {
      * @param filePath
      * @return 값이 있으면 MediaData, 없으면 null 반환
      */
-    fun getFileData(filePath: String): MediaData? {
+    fun getFileData(filePath: String): MusicData? {
         // 지정한 폴더와 그 아래에 있는 모든 음원 파일을 가져온다.
         // MediaStore.Audio.Media.EXTERNAL_CONTENT_URI
         val listUrl = MediaStore.Audio.Media.EXTERNAL_CONTENT_URI //filePath.substringBeforeLast("/").toUri()
@@ -160,7 +175,7 @@ class FolderViewModel: ViewModel() {
             // TODO: Invalid column is_favorite 오류 발생 수정 필요
             println("오류: ${e.message}")
         }
-        var fileItem: MediaData? = null
+        var fileItem: MusicData? = null
         if(cursor != null){
             while(cursor.moveToNext()) {
                 val path = cursor.getColumnIndex(projection[6])
@@ -177,15 +192,31 @@ class FolderViewModel: ViewModel() {
                     val duration = cursor.getColumnIndex(projection[5])
                     //val isFavorite = cursor.getColumnIndex(projection[6])
 
-                    fileItem = MediaData(
-                        id = if(id != -1) cursor.getString(id) else "",
+                    // 노래 기본 썸네일
+                    val defaultDrawable = ContextCompat.getDrawable(
+                        SoriBadaApplication.instance, R.drawable.ic_music_note_white_24)
+                    defaultDrawable?.let { convertDrawableToBitmap(it) }
+                    val defaultThumbnail: Bitmap? = defaultDrawable?.toBitmap()
+
+                    // 파일에서 가져온 썸네일
+                    var fileThumbnail: Bitmap? = null
+                    val tempAlbumID = cursor.getLong(albumID)
+                    if(tempAlbumID != 0L){
+                        val contentUri = ContentUris.withAppendedId(MediaStore.Audio.Albums.EXTERNAL_CONTENT_URI, tempAlbumID)
+                        fileThumbnail = getThumbnailFromPath(contentUri)
+                    }
+
+                    fileItem = MusicData(
+                        thumbnail = fileThumbnail ?: defaultThumbnail,
+                        id = if(id != -1) cursor.getLong(id) else -1L,
                         title = if(title != -1) cursor.getString(title) else "",
                         artist = if(artist != -1) cursor.getString(artist) else "",
                         albumID = if(albumID != -1) cursor.getLong(albumID) else -1L,
-                        duration = if(duration != -1) cursor.getInt(duration).toUInt() else 0.toUInt(),
+                        duration = if(duration != -1) cursor.getInt(duration) else 0,
                         albumArtist = if(albumArtist != -1) cursor.getString(albumArtist) ?: "" else "",
-                        isFavorite = false,//if(isFavorite != -1) cursor.getInt(isFavorite) == 1 else false,
-                        path = if(path != -1) cursor.getString(path) ?: "" else ""
+                        favorite = false,
+                        path = if(path != -1) cursor.getString(path) ?: "" else "",
+                        index = -1
                     )
                     break
                 }
@@ -193,6 +224,8 @@ class FolderViewModel: ViewModel() {
         }
         return fileItem
     }
+
+
 
     fun getThumbnailFromPath(fileUri: Uri): Bitmap? {
         val imageSize = Size(50, 50)

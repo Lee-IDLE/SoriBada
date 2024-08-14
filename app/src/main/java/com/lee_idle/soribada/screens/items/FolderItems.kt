@@ -28,6 +28,7 @@ import com.lee_idle.soribada.R
 import com.lee_idle.soribada.objectClass.CurrentMusic
 import com.lee_idle.soribada.models.MusicData
 import com.lee_idle.soribada.viewModels.FolderViewModel
+import kotlin.random.Random
 
 @Composable
 fun folderItems(thumbnail: Bitmap, musicData: MusicData, folderViewModel: FolderViewModel) {
@@ -40,6 +41,21 @@ fun folderItems(thumbnail: Bitmap, musicData: MusicData, folderViewModel: Folder
                     // 폴더인 경우
                     folderViewModel.getListFromDirectory(musicData.path)
                 } else {
+
+                    if(CurrentMusic.musicData.value != null){
+                        if(CurrentMusic.musicData.value!!.path.substringBeforeLast("/") !=
+                            musicData.path.substringBeforeLast("/")){
+                            CurrentMusic.currentMusicList.clear()
+                            CurrentMusic.setCurrentMusicList(folderViewModel.fileList)
+
+                            for (n in 0 until CurrentMusic.currentMusicList.size) {
+                                val ranNum = Random.nextInt(CurrentMusic.currentMusicList.size)
+                                CurrentMusic.addPlayListIndex(ranNum)
+                            }
+                        }
+                    }
+
+
                     // 음원 파일인 경우
                     CurrentMusic.setTumbnail(thumbnail)
                     CurrentMusic.setMusicData(musicData)
@@ -107,6 +123,7 @@ fun viewTest() {
 
     val defaultThumbnail: Bitmap = drawable.toBitmap()
     val testData = MusicData(
+        thumbnail = null,
         id = 0L,
         title = "테스트 제목",
         artist = "",

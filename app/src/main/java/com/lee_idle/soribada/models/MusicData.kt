@@ -1,6 +1,9 @@
 package com.lee_idle.soribada.models
 
+import android.graphics.Bitmap
+
 data class MusicData(
+    val thumbnail: Bitmap?,
     val id: Long,
     val title: String,
     val artist: String,
